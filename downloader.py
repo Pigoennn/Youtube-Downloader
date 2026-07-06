@@ -34,8 +34,19 @@ class Downloader:
                         "preferredquality": "192",
                 }]
             case "mp4":
-                currentConfig["format"] = "bestvideo+bestaudio/best"
+                currentConfig["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best"
                 currentConfig["merge_output_format"] = "mp4"
+                currentConfig["remux_video"] = "mp4"
+                currentConfig["postprocessors"] = [{
+                    "key": "FFmpegVideoConvertor",
+                    "preferedformat": "mp4",
+                }]
+                currentConfig["postprocessor_args"] = {
+                        "ExtractAudio": [
+                            "-c:v", "copy",
+                            "-c:a", "aac"
+                        ]
+                    }
             case _:
                 return "Choose a file type"
             
