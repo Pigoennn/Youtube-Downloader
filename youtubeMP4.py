@@ -24,69 +24,62 @@ def findImage(original: str):
         relativepath = mainthing
     return path.join(basepath, relativepath)
 
-def downloader(filetype: str, link: str):
-    youtubevideoobject = YouTube(link)
-    '''try:
-        youtubevideoobject = YouTube(link)
-    except Exception as Error:
-        return f"You made an oopsie: {Error}"'''
-    match filetype:
-        case "mp4":    
-            youtubevideoobject = youtubevideoobject.streams.get_highest_resolution()
-            try:
-                youtubevideoobject.download(output_path = downloadpath)
-                return "Done!"
-            except Exception as Error:
-                return f'Oopie: {Error}'
-        case "mp3":
-            try:
-                stream = youtubevideoobject.streams.filter(only_audio = True).first()
-                title = str(youtubevideoobject.title)
-                if any(i in title for i in BAD_LIST):
-                    for j in BAD_LIST:
-                        title = title.replace(j, "")
-                stream.download(output_path=downloadpath, filename = title + '.mp3')
-                return "Done!"
-            except Exception as Error:
-                print(Error)
-                return f'Oopie: {Error}'
-        case _:
-            return "Bro choose mp3 or mp4"
-
 class Downloader:
-    downloadType: str
+    """
+    Class to manage downloading files of a given type from a given link 
+    """
+    outputPath: str
+    baseConfig: dict[str, Any]
+    ydlConfig: dict[str, Any]
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, outputPath: str = ".") -> None:
+        self.outputPath = outputPath
+        self.baseConfig = {
+            "outtmpl": f"{outputPath}/%(title)s.%(ext)s"
+        }
+        self.ydlConfig: dict[str, Any] = {}
 
-    def setConfig(self, downloadType: str, outputPath: str = ".") -> bool:
-        ydlConfig: dict[str, Any] = {
-            "outtmpl": f"{outputPath}/%(title)s.%(ext)s",
-        } 
-        
+    def setConfig(self, downloadType: str) -> bool:
+        """
+        Set the config from the given download type
+        """
+        currentConfig = self.baseConfig.copy()      # set as temporary for now
         match downloadType:
             case "mp3":
-                ydlConfig["format"] = "bestaudio/best"
-                ydlConfig["postprocessors"] = [{
+                currentConfig["format"] = "bestaudio/best"
+                currentConfig["postprocessors"] = [{
                         "key": "FFmpegExtractAudio",
                         "preferredcodec": "mp3",
                         "preferredquality": "192",
                 }]
             case "mp4":
-                ydlConfig["format"] = "bestvideo+bestaudio/best"
-                ydlConfig["merge_output_format"] = "mp4"
+                currentConfig["format"] = "bestvideo+bestaudio/best"
+                currentConfig["merge_output_format"] = "mp4"
             case _:
                 return False
-        
+            
+        self.ydlConfig = currentConfig
         return True
 
     def download(self, url: str) -> str:
-        with yt_dlp.YoutubeDL(ydlConfig) as ydl:        # type: ignore
+        """
+        Download the file format from the given url.
+        All config settings must be set first.
+        """
+        if not self.canDownload():
+            return "ERROR: Configuration not set. Set the configurations first."
+        
+        with yt_dlp.YoutubeDL(self.ydlConfig) as ydl:        # type: ignore
             try:
                 ydl.download([url])
             except Exception as e:
                 return f"ERROR: {e}"
         return "Downloaded!"
+    
+    def canDownload(self) -> bool:
+        """Checks that all config settings have been set."""
+        requiredFeatures = ["format"]       # can add more later
+        return set(requiredFeatures).issubset(self.ydlConfig.keys())
 
 class YouTubeDownloaderUI(QWidget):
     def __init__(self) -> None:
