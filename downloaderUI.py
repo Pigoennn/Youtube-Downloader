@@ -128,7 +128,7 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read("config.ini")
 
-    ffmpegPath = config["LOCATIONS"]["ffmpeg location"]
+    ffmpegPath = config["LOCATIONS"]["ffmpeg_location"]
 
     window = YouTubeDownloaderUI(Downloader(ffmpegPath=ffmpegPath))
     window.show()
