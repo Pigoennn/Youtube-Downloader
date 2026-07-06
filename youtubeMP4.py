@@ -1,5 +1,8 @@
 from pytube import YouTube
 #from pytubefix import YouTube
+
+import yt_dlp
+from typing import Any
 from pathlib import Path
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QApplication, QWidget
 from PyQt6.QtCore import Qt
@@ -50,15 +53,50 @@ def downloader(filetype: str, link: str):
         case _:
             return "Bro choose mp3 or mp4"
 
-class YouTubeDownloader(QWidget):
+class Downloader:
+    downloadType: str
+
+    def __init__(self) -> None:
+        pass
+
+    def setConfig(self, downloadType: str, outputPath: str = ".") -> bool:
+        ydlConfig: dict[str, Any] = {
+            "outtmpl": f"{outputPath}/%(title)s.%(ext)s",
+        } 
+        
+        match downloadType:
+            case "mp3":
+                ydlConfig["format"] = "bestaudio/best"
+                ydlConfig["postprocessors"] = [{
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
+                }]
+            case "mp4":
+                ydlConfig["format"] = "bestvideo+bestaudio/best"
+                ydlConfig["merge_output_format"] = "mp4"
+            case _:
+                return False
+        
+        return True
+
+    def download(self, url: str) -> str:
+        with yt_dlp.YoutubeDL(ydlConfig) as ydl:        # type: ignore
+            try:
+                ydl.download([url])
+            except Exception as e:
+                return f"ERROR: {e}"
+        return "Downloaded!"
+
+class YouTubeDownloaderUI(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
         self.setWindowTitle("YouTube Video Downloader")
-        self.setWindowIcon(QIcon(findimage("shocku.png")))
-        self.createradiobuttons()
-        self.createurlinput()
-        self.createlabels()
+        self.setWindowIcon(QIcon(findImage("shocku.png")))
+        self.createRadioButtons()
+        self.createURLInput()
+        self.createLabels()
         self.createPushButtons()
 
         self.resize(400,200)
@@ -146,6 +184,6 @@ class YouTubeDownloader(QWidget):
 from sys import argv, exit
 
 app = QApplication(argv)
-window = YouTubeDownloader()
+window = YouTubeDownloaderUI()
 window.show()
 exit(app.exec())
