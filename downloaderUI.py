@@ -1,11 +1,10 @@
 from pathlib import Path
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QApplication, QWidget
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from os import startfile, path
 from downloader import Downloader
 import sys
-import configparser
 
 DOWNLOAD_PATH = str(Path.home()/"Downloads")
 BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
@@ -25,111 +24,109 @@ class YouTubeDownloaderUI(QWidget):
 
         self.resize(400,200)
 
-        self.totallayout = QVBoxLayout()
-        self.optionarea = QHBoxLayout()
-        self.radiolayout = QVBoxLayout()
-        self.urllayout = QVBoxLayout()
+        self.fullLayout = QVBoxLayout()
+        self.configurationArea = QHBoxLayout()
+        self.radioButtonLayout = QVBoxLayout()
+        self.urlLayout = QVBoxLayout()
 
-        self.totallayout.addWidget(self.titlelabel, alignment = Qt.AlignmentFlag.AlignCenter)
-        self.totallayout.addLayout(self.optionarea)
+        self.fullLayout.addWidget(self.titleLabel, alignment = Qt.AlignmentFlag.AlignCenter)
+        self.fullLayout.addLayout(self.configurationArea)
 
-        self.optionarea.addLayout(self.radiolayout)
-        self.radiolayout.addWidget(self.mplabel)
-        self.radiolayout.addWidget(self.mp3button)
-        self.radiolayout.addWidget(self.mp4button)
+        self.configurationArea.addLayout(self.radioButtonLayout)
+        self.radioButtonLayout.addWidget(self.fileTypeLabel)
+        self.radioButtonLayout.addWidget(self.mp3Button)
+        self.radioButtonLayout.addWidget(self.mp4Button)
 
-        self.optionarea.addLayout(self.urllayout)
-        self.urllayout.addWidget(self.urllabel)
-        self.urllayout.addWidget(self.urlbox)
+        self.configurationArea.addLayout(self.urlLayout)
+        self.urlLayout.addWidget(self.urlLabel)
+        self.urlLayout.addWidget(self.urlBox)
 
-        self.totallayout.addWidget(self.errorlabel, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.totallayout.addWidget(self.downloadbutton, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.totallayout.addWidget(self.gotodownloadfolderbutton, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.fullLayout.addWidget(self.errorLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.fullLayout.addWidget(self.downloadButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.fullLayout.addWidget(self.folderRedirectionButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.setLayout(self.totallayout)
+        self.setLayout(self.fullLayout)
 
     def findImage(self, relative_path: str) -> str:
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
-            base_path = getattr(sys, '_MEIPASS')
+            basePath = getattr(sys, '_MEIPASS')
         except AttributeError:
-            base_path = path.abspath(".")
+            basePath = path.abspath(".")
 
-        return path.join(base_path, relative_path)
+        return path.join(basePath, relative_path)
 
     def createURLInput(self):
-        self.urlbox = QLineEdit()
-        self.urlbox.setFixedWidth(150)
-        #self.urlbox.setFixedSize(150,60)
-        self.urlbox.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.urlbox.textChanged.connect(self.update)
+        """ Create the input box for URLs """
+        self.urlBox = QLineEdit()
+        self.urlBox.setFixedWidth(150)
+        #self.urlBox.setFixedSize(150,60)
+        self.urlBox.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.urlBox.textChanged.connect(self.update)
     
     def createLabels(self):
-        self.titlelabel = QLabel("<h2>Jono's Really Cool Video Downloader</h2>")
-        self.mplabel = QLabel("<h3>Choose File Type:</h3>")
-        self.urllabel = QLabel("<h3>URL</h3>")
-        self.errorlabel = QLabel("")
-        self.errorlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        """ Create the title and instruction labels """
+        self.titleLabel = QLabel("<h2>Jono's Really Cool Video Downloader</h2>")
+        self.fileTypeLabel = QLabel("<h3>Choose File Type:</h3>")
+        self.urlLabel = QLabel("<h3>URL</h3>")
+        self.errorLabel = QLabel("")
+        self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
     def createPushButtons(self):
-        self.downloadbutton = QPushButton("Download")
-        self.downloadbutton.clicked.connect(self.downloading)
-        self.downloadbutton.setFixedSize(200,30)
-        self.gotodownloadfolderbutton = QPushButton("Go to Downloads Folder")
-        self.downloadbutton.setFixedSize(175, 25)
-        self.gotodownloadfolderbutton.setVisible(False)
-        self.gotodownloadfolderbutton.clicked.connect(self.openDownloads)
+        """ Create the push buttons """
+        self.downloadButton = QPushButton("Download")
+        self.downloadButton.clicked.connect(self.download)
+        self.downloadButton.setFixedSize(200,30)
+        self.folderRedirectionButton = QPushButton("Go to Downloads Folder")
+        self.downloadButton.setFixedSize(175, 25)
+        self.folderRedirectionButton.setVisible(False)
+        self.folderRedirectionButton.clicked.connect(self.openDownloads)
 
     def createRadioButtons(self):
-        self.mp3button = QRadioButton("MP3", self)
-        self.mp3button.toggled.connect(self.optionSelected)
+        """ Create the Radio Selection Buttons """
+        self.mp3Button = QRadioButton("MP3", self)
+        self.mp3Button.toggled.connect(self.optionSelected)
 
-        self.mp4button = QRadioButton("MP4", self)
-        self.mp4button.toggled.connect(self.optionSelected)
+        self.mp4Button = QRadioButton("MP4", self)
+        self.mp4Button.toggled.connect(self.optionSelected)
 
     def optionSelected(self):
-        self.mpoption = self.sender().text()
+        """ Function called to get value of the radio selection options """
+        self.fileTypeOption = self.sender().text()
 
     def update(self):
-        self.errorlabel.setText("")
-        self.gotodownloadfolderbutton.setVisible(False)
+        """
+        Called when a URL has been inputted.
+        Resets the app to look clean.
+        """
+        self.errorLabel.setText("")
+        self.folderRedirectionButton.setVisible(False)
 
-    def downloading(self):
-        self.errorlabel.setText("")
+    def download(self):
+        """ Function called to attempt to download the file type from the given URL """
+        self.errorLabel.setText("")
         
-        url: str = self.urlbox.text()
+        url: str = self.urlBox.text()
         if url == "":
-            self.errorlabel.setText("URL Missing")
+            self.errorLabel.setText("URL Missing")
             return
         
         # set up the config
-        resultMessage = self.downloader.setConfig(self.mpoption.lower())
+        resultMessage = self.downloader.setConfig(self.fileTypeOption.lower())
         if resultMessage != "":
-            self.errorlabel.setText(resultMessage)
+            self.errorLabel.setText(resultMessage)
             return
 
         # attempt to download
-        self.errorlabel.setText("Loading...")
+        self.errorLabel.setText("Loading...")
         resultMessage = self.downloader.download(url)
-        self.errorlabel.setText(resultMessage)
+        self.errorLabel.setText(resultMessage)
 
         # if successful, update UI
         if resultMessage[:6] != "ERROR:":
-            self.gotodownloadfolderbutton.setVisible(True)
+            self.folderRedirectionButton.setVisible(True)
             self.resize(400, 230)
     
     def openDownloads(self):
+        """ Function called to open the downloads folder. """
         startfile(DOWNLOAD_PATH)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    # check if ffmpeg exe is listed
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-
-    ffmpegPath = config["LOCATIONS"]["ffmpeg_location"]
-
-    window = YouTubeDownloaderUI(Downloader(ffmpegPath=ffmpegPath))
-    window.show()
-    exit(app.exec())
