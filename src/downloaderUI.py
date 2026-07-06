@@ -90,9 +90,11 @@ class YouTubeDownloaderUI(QWidget):
         self.mp4Button = QRadioButton("MP4", self)
         self.mp4Button.toggled.connect(self.optionSelected)
 
+        self.fileTypeOption = ""
+
     def optionSelected(self):
         """ Function called to get value of the radio selection options """
-        self.fileTypeOption = self.sender().text()
+        self.fileTypeOption = self.sender().text()      # type: ignore
 
     def update(self):
         """

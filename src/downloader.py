@@ -9,15 +9,14 @@ class Downloader:
     baseConfig: dict[str, Any]
     ydlConfig: dict[str, Any]
 
-    def __init__(self, outputPath: str = ".", ffmpegPath: str | None = None) -> None:
+    def __init__(self, outputPath: str = ".", ffmpegPath: str = "C:\\ffmpeg\\bin") -> None:
         self.outputPath = outputPath
         self.baseConfig = {
             "outtmpl": f"{outputPath}/%(title)s.%(ext)s"
         }
         self.ydlConfig: dict[str, Any] = {}
 
-        if (ffmpegPath):
-            self.baseConfig["ffmpeg_location"] = ffmpegPath
+        self.baseConfig["ffmpeg_location"] = ffmpegPath
             
     def setConfig(self, downloadType: str) -> str:
         """
