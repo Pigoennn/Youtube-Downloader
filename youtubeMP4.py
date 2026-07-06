@@ -7,10 +7,10 @@ from PyQt6.QtGui import QIcon
 from os import startfile, path
 import sys
 
-downloadpath = str(Path.home()/"Downloads")
-badlist = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
+downloadPath = str(Path.home()/"Downloads")
+BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
 
-def findimage(original: str):
+def findImage(original: str):
     try:
         basepath = sys._MEIPASS
     except AttributeError:
@@ -39,8 +39,8 @@ def downloader(filetype: str, link: str):
             try:
                 stream = youtubevideoobject.streams.filter(only_audio = True).first()
                 title = str(youtubevideoobject.title)
-                if any(i in title for i in badlist):
-                    for j in badlist:
+                if any(i in title for i in BAD_LIST):
+                    for j in BAD_LIST:
                         title = title.replace(j, "")
                 stream.download(output_path=downloadpath, filename = title + '.mp3')
                 return "Done!"
@@ -59,7 +59,7 @@ class YouTubeDownloader(QWidget):
         self.createradiobuttons()
         self.createurlinput()
         self.createlabels()
-        self.createpushbuttons()
+        self.createPushButtons()
 
         self.resize(400,200)
 
@@ -86,37 +86,37 @@ class YouTubeDownloader(QWidget):
 
         self.setLayout(self.totallayout)
 
-    def createurlinput(self):
+    def createURLInput(self):
         self.urlbox = QLineEdit()
         self.urlbox.setFixedWidth(150)
         #self.urlbox.setFixedSize(150,60)
         self.urlbox.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.urlbox.textChanged.connect(self.update)
     
-    def createlabels(self):
+    def createLabels(self):
         self.titlelabel = QLabel("<h2>Jono's Really Cool Video Downloader</h2>")
         self.mplabel = QLabel("<h3>Choose File Type:</h3>")
         self.urllabel = QLabel("<h3>URL</h3>")
         self.errorlabel = QLabel("")
         self.errorlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
-    def createpushbuttons(self):
+    def createPushButtons(self):
         self.downloadbutton = QPushButton("Download")
         self.downloadbutton.clicked.connect(self.downloading)
         self.downloadbutton.setFixedSize(200,30)
         self.gotodownloadfolderbutton = QPushButton("Go to Downloads Folder")
         self.downloadbutton.setFixedSize(175, 25)
         self.gotodownloadfolderbutton.setVisible(False)
-        self.gotodownloadfolderbutton.clicked.connect(self.opendownloads)
+        self.gotodownloadfolderbutton.clicked.connect(self.openDownloads)
 
-    def createradiobuttons(self):
+    def createRadioButtons(self):
         self.mp3button = QRadioButton("MP3", self)
-        self.mp3button.toggled.connect(self.optionselected)
+        self.mp3button.toggled.connect(self.optionSelected)
 
         self.mp4button = QRadioButton("MP4", self)
-        self.mp4button.toggled.connect(self.optionselected)
+        self.mp4button.toggled.connect(self.optionSelected)
 
-    def optionselected(self):
+    def optionSelected(self):
         self.mpoption = self.sender().text()
 
     def update(self):
@@ -140,7 +140,7 @@ class YouTubeDownloader(QWidget):
         else:
             self.errorlabel.setText(string)
     
-    def opendownloads(self):
+    def openDownloads(self):
         startfile(downloadpath)
 
 from sys import argv, exit
