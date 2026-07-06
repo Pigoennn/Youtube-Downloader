@@ -10,19 +10,8 @@ from PyQt6.QtGui import QIcon
 from os import startfile, path
 import sys
 
-downloadPath = str(Path.home()/"Downloads")
+DOWNLOAD_PATH = str(Path.home()/"Downloads")
 BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
-
-def findImage(original: str):
-    try:
-        basepath = sys._MEIPASS
-    except AttributeError:
-        basepath = path.abspath(".")
-        relativepath = original
-    else:
-        mainthing = path.split(original)[1]
-        relativepath = mainthing
-    return path.join(basepath, relativepath)
 
 class Downloader:
     """
@@ -39,9 +28,10 @@ class Downloader:
         }
         self.ydlConfig: dict[str, Any] = {}
 
-    def setConfig(self, downloadType: str) -> bool:
+    def setConfig(self, downloadType: str) -> str:
         """
-        Set the config from the given download type
+        Set the config from the given download type.
+        Returns an error code if an error occurs, otherwise returns an empty string.
         """
         currentConfig = self.baseConfig.copy()      # set as temporary for now
         match downloadType:
@@ -56,10 +46,10 @@ class Downloader:
                 currentConfig["format"] = "bestvideo+bestaudio/best"
                 currentConfig["merge_output_format"] = "mp4"
             case _:
-                return False
+                return "Choose a file type"
             
         self.ydlConfig = currentConfig
-        return True
+        return ""
 
     def download(self, url: str) -> str:
         """
@@ -82,11 +72,13 @@ class Downloader:
         return set(requiredFeatures).issubset(self.ydlConfig.keys())
 
 class YouTubeDownloaderUI(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, downloader: Downloader) -> None:
         super().__init__()
 
+        self.downloader = downloader
+
         self.setWindowTitle("YouTube Video Downloader")
-        self.setWindowIcon(QIcon(findImage("shocku.png")))
+        self.setWindowIcon(QIcon(self.findImage("shocku.png")))
         self.createRadioButtons()
         self.createURLInput()
         self.createLabels()
@@ -116,6 +108,15 @@ class YouTubeDownloaderUI(QWidget):
         self.totallayout.addWidget(self.gotodownloadfolderbutton, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(self.totallayout)
+
+    def findImage(self, relative_path: str) -> str:
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            base_path = getattr(sys, '_MEIPASS')
+        except AttributeError:
+            base_path = path.abspath(".")
+
+        return path.join(base_path, relative_path)
 
     def createURLInput(self):
         self.urlbox = QLineEdit()
@@ -156,27 +157,34 @@ class YouTubeDownloaderUI(QWidget):
 
     def downloading(self):
         self.errorlabel.setText("")
-        if not(self.mp3button.isChecked() or self.mp4button.isChecked()):
-            return self.errorlabel.setText("You have not chosen a File Type")
-        elif self.urlbox.text() == "":
-            return self.errorlabel.setText("You have not input a URL")
+        
+        url: str = self.urlbox.text()
+        if url == "":
+            self.errorlabel.setText("URL Missing")
+            return
+        
+        # set up the config
+        resultMessage = self.downloader.setConfig(self.mpoption.lower())
+        if resultMessage != "":
+            self.errorlabel.setText(resultMessage)
+            return
 
+        # attempt to download
         self.errorlabel.setText("Loading...")
-        string = downloader(self.mpoption.lower(), self.urlbox.text())
-        self.errorlabel.setText("")
-        if string == "Done!":
-            self.errorlabel.setText(string)
+        resultMessage = self.downloader.download(url)
+        self.errorlabel.setText(resultMessage)
+
+        # If successful, update UI
+        if resultMessage[:6] != "ERROR:":
             self.gotodownloadfolderbutton.setVisible(True)
             self.resize(400, 230)
-        else:
-            self.errorlabel.setText(string)
     
     def openDownloads(self):
-        startfile(downloadpath)
+        startfile(DOWNLOAD_PATH)
 
 from sys import argv, exit
 
 app = QApplication(argv)
-window = YouTubeDownloaderUI()
+window = YouTubeDownloaderUI(Downloader())
 window.show()
 exit(app.exec())
