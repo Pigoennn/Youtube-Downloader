@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLine
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from os import startfile, path
-from downloader import Downloader
+from src.downloader import Downloader
 import sys
 
 DOWNLOAD_PATH = str(Path.home()/"Downloads")

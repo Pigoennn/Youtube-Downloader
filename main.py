@@ -1,5 +1,5 @@
-from downloader import Downloader
-from downloaderUI import YouTubeDownloaderUI
+from src.downloader import Downloader
+from src.downloaderUI import YouTubeDownloaderUI
 from PyQt6.QtWidgets import QApplication
 import configparser
 import sys
