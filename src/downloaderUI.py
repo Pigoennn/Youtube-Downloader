@@ -11,10 +11,11 @@ BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!
 ERROR_PREFIX = "ERROR: "
 
 class YouTubeDownloaderUI(QWidget):
-    def __init__(self, downloader: Downloader) -> None:
+    def __init__(self, downloader: Downloader, outputPath: str = DOWNLOAD_PATH) -> None:
         super().__init__()
 
         self.downloader = downloader
+        self.outputPath = outputPath
 
         self.setWindowTitle("YouTube Video Downloader")
         self._createRadioButtons()
@@ -144,4 +145,4 @@ class YouTubeDownloaderUI(QWidget):
     
     def _openDownloads(self) -> None:
         """ Function called to open the downloads folder. """
-        startfile(DOWNLOAD_PATH)
+        startfile(self.outputPath)

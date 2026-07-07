@@ -28,7 +28,7 @@ if __name__ == "__main__":
         displayError(e)
         sys.exit(1)
 
-    window = YouTubeDownloaderUI(Downloader(outputPath))
+    window = YouTubeDownloaderUI(Downloader(outputPath), outputPath)
     window.setImage(imageName)
     window.show()
     sys.exit(app.exec())
