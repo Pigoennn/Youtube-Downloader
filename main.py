@@ -18,4 +18,4 @@ if __name__ == "__main__":
     window = YouTubeDownloaderUI(Downloader(outputPath))
     window.setImage(imageName)
     window.show()
-    exit(app.exec())
+    sys.exit(app.exec())

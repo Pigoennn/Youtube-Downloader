@@ -56,9 +56,17 @@ class YouTubeDownloaderUI(QWidget):
 
         return path.join(basePath, relative_path)
     
-    def setImage(self, image_name: str) -> None:
+    def setImage(self, imageName: str) -> None:
         """ Set the image of the application. """
-        self.setWindowIcon(QIcon(self._getAbsolutePath(image_name)))
+        # figure out first which path to use
+        if getattr(sys, "frozen", False):
+            basePath = getattr(sys, "_MEIPASS", path.abspath("."))
+            imagePath = path.join(basePath, imageName)
+        else:
+            basePath = path.dirname(path.dirname(path.abspath(__file__)))
+            imagePath = path.join(basePath, imageName)
+            
+        self.setWindowIcon(QIcon(imagePath))
 
     def _createURLInput(self) -> None:
         """ Create the input box for URLs """
