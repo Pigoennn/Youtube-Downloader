@@ -1,6 +1,8 @@
 from typing import Any
 import yt_dlp
 
+ERROR_PREFIX = "ERROR: "
+
 class Downloader:
     """
     Class to manage downloading files of a given type from a given link 
@@ -58,13 +60,13 @@ class Downloader:
         All config settings must be set first.
         """
         if not self.canDownload():
-            return "ERROR: Configuration not set. Set the configurations first."
+            return ERROR_PREFIX + "Configuration not set. Set the configurations first."
         
         with yt_dlp.YoutubeDL(self.ydlConfig) as ydl:        # type: ignore
             try:
                 ydl.download([url])
             except Exception as e:
-                return f"ERROR: {e}"
+                return f"{ERROR_PREFIX}{e}"
         return "Downloaded!"
     
     def canDownload(self) -> bool:

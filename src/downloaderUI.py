@@ -8,6 +8,7 @@ import sys
 
 DOWNLOAD_PATH = str(Path.home()/"Downloads")
 BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
+ERROR_PREFIX = "ERROR: "
 
 class YouTubeDownloaderUI(QWidget):
     def __init__(self, downloader: Downloader) -> None:
@@ -16,7 +17,6 @@ class YouTubeDownloaderUI(QWidget):
         self.downloader = downloader
 
         self.setWindowTitle("YouTube Video Downloader")
-        self.setWindowIcon(QIcon(self.findImage("shocku.ico")))
         self.createRadioButtons()
         self.createURLInput()
         self.createLabels()
@@ -47,7 +47,7 @@ class YouTubeDownloaderUI(QWidget):
 
         self.setLayout(self.fullLayout)
 
-    def findImage(self, relative_path: str) -> str:
+    def getAbsolutePath(self, relative_path: str) -> str:
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
             basePath = getattr(sys, '_MEIPASS')
@@ -55,6 +55,10 @@ class YouTubeDownloaderUI(QWidget):
             basePath = path.abspath(".")
 
         return path.join(basePath, relative_path)
+    
+    def setImage(self, image_name: str) -> None:
+        """ Set the image of the application. """
+        self.setWindowIcon(QIcon(self.getAbsolutePath(image_name)))
 
     def createURLInput(self) -> None:
         """ Create the input box for URLs """
@@ -90,7 +94,7 @@ class YouTubeDownloaderUI(QWidget):
         self.mp4Button = QRadioButton("MP4", self)
         self.mp4Button.toggled.connect(self.optionSelected)
 
-        self.fileTypeOption = ""
+        self.fileTypeOption = ""        # set to empty to start
 
     def optionSelected(self) -> None:
         """ Function called to get value of the radio selection options """
@@ -125,7 +129,7 @@ class YouTubeDownloaderUI(QWidget):
         self.errorLabel.setText(resultMessage)
 
         # if successful, update UI
-        if resultMessage[:6] != "ERROR:":
+        if resultMessage[:len(ERROR_PREFIX)] != ERROR_PREFIX:
             self.folderRedirectionButton.setVisible(True)
             self.resize(400, 230)
     
