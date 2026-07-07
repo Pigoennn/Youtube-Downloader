@@ -26,9 +26,9 @@ class Downloader:
         }
         self.ydlConfig: dict[str, Any] = {}
         
-        self.baseConfig["ffmpeg_location"] = self.getFFMPEGLocation()
+        self.baseConfig["ffmpeg_location"] = self._getFFMPEGLocation()
 
-    def getFFMPEGLocation(self) -> str:
+    def _getFFMPEGLocation(self) -> str:
         """ Get ffmpeg location using Path """
         if getattr(sys, "frozen", False):
             # when run from exe
@@ -77,7 +77,7 @@ class Downloader:
         Download the file format from the given url.
         All config settings must be set first.
         """
-        if not self.canDownload():
+        if not self._canDownload():
             return ERROR_PREFIX + "Configuration not set. Set the configurations first."
         
         with yt_dlp.YoutubeDL(self.ydlConfig) as ydl:        # type: ignore
@@ -93,7 +93,7 @@ class Downloader:
                 return f"{ERROR_PREFIX}{e}"
         return "Downloaded!"
     
-    def canDownload(self) -> bool:
+    def _canDownload(self) -> bool:
         """Checks that all config settings have been set."""
         requiredFeatures = ["format"]       # can add more later
         return set(requiredFeatures).issubset(self.ydlConfig.keys())

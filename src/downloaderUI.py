@@ -17,10 +17,10 @@ class YouTubeDownloaderUI(QWidget):
         self.downloader = downloader
 
         self.setWindowTitle("YouTube Video Downloader")
-        self.createRadioButtons()
-        self.createURLInput()
-        self.createLabels()
-        self.createPushButtons()
+        self._createRadioButtons()
+        self._createURLInput()
+        self._createLabels()
+        self._createPushButtons()
 
         self.setFixedSize(400, 200)
 
@@ -47,7 +47,7 @@ class YouTubeDownloaderUI(QWidget):
 
         self.setLayout(self.fullLayout)
 
-    def getAbsolutePath(self, relative_path: str) -> str:
+    def _getAbsolutePath(self, relative_path: str) -> str:
         """ Get absolute path to resource, works for dev and for PyInstaller """
         try:
             basePath = getattr(sys, '_MEIPASS')
@@ -58,9 +58,9 @@ class YouTubeDownloaderUI(QWidget):
     
     def setImage(self, image_name: str) -> None:
         """ Set the image of the application. """
-        self.setWindowIcon(QIcon(self.getAbsolutePath(image_name)))
+        self.setWindowIcon(QIcon(self._getAbsolutePath(image_name)))
 
-    def createURLInput(self) -> None:
+    def _createURLInput(self) -> None:
         """ Create the input box for URLs """
         self.urlBox = QLineEdit()
         self.urlBox.setFixedWidth(150)
@@ -68,7 +68,7 @@ class YouTubeDownloaderUI(QWidget):
         self.urlBox.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.urlBox.textChanged.connect(self.update)
     
-    def createLabels(self) -> None:
+    def _createLabels(self) -> None:
         """ Create the title and instruction labels """
         self.titleLabel = QLabel("<h2>Jono's Really Cool Video Downloader</h2>")
         self.fileTypeLabel = QLabel("<h3>Choose File Type:</h3>")
@@ -76,31 +76,31 @@ class YouTubeDownloaderUI(QWidget):
         self.errorLabel = QLabel("")
         self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
-    def createPushButtons(self) -> None:
+    def _createPushButtons(self) -> None:
         """ Create the push buttons """
         self.downloadButton = QPushButton("Download")
-        self.downloadButton.clicked.connect(self.download)
+        self.downloadButton.clicked.connect(self._download)
         self.downloadButton.setFixedSize(200,30)
         self.folderRedirectionButton = QPushButton("Go to Downloads Folder")
         self.downloadButton.setFixedSize(175, 25)
         self.folderRedirectionButton.setVisible(False)
-        self.folderRedirectionButton.clicked.connect(self.openDownloads)
+        self.folderRedirectionButton.clicked.connect(self._openDownloads)
 
-    def createRadioButtons(self) -> None:
+    def _createRadioButtons(self) -> None:
         """ Create the Radio Selection Buttons """
         self.mp3Button = QRadioButton("MP3", self)
-        self.mp3Button.toggled.connect(self.optionSelected)
+        self.mp3Button.toggled.connect(self._optionSelected)
 
         self.mp4Button = QRadioButton("MP4", self)
-        self.mp4Button.toggled.connect(self.optionSelected)
+        self.mp4Button.toggled.connect(self._optionSelected)
 
         self.fileTypeOption = ""        # set to empty to start
 
-    def optionSelected(self) -> None:
+    def _optionSelected(self) -> None:
         """ Function called to get value of the radio selection options """
         self.fileTypeOption = self.sender().text()      # type: ignore
 
-    def update(self) -> None:
+    def _update(self) -> None:
         """
         Called when a URL has been inputted.
         Resets the app to look clean.
@@ -109,7 +109,7 @@ class YouTubeDownloaderUI(QWidget):
         self.folderRedirectionButton.setVisible(False)
         self.setFixedSize(400, 200)
 
-    def download(self) -> None:
+    def _download(self) -> None:
         """ Function called to attempt to download the file type from the given URL """
         self.errorLabel.setText("")
         
@@ -134,6 +134,6 @@ class YouTubeDownloaderUI(QWidget):
             self.folderRedirectionButton.setVisible(True)
             self.setFixedSize(400, 230)
     
-    def openDownloads(self) -> None:
+    def _openDownloads(self) -> None:
         """ Function called to open the downloads folder. """
         startfile(DOWNLOAD_PATH)
