@@ -1,6 +1,6 @@
 from typing import Any
 import yt_dlp
-
+from yt_dlp.utils import DownloadError, ExtractorError, GeoRestrictedError
 ERROR_PREFIX = "ERROR: "
 
 class Downloader:
@@ -65,6 +65,12 @@ class Downloader:
         with yt_dlp.YoutubeDL(self.ydlConfig) as ydl:        # type: ignore
             try:
                 ydl.download([url])
+            except GeoRestrictedError as e:
+                return ERROR_PREFIX + "Video is geo-restricted."
+            except DownloadError as e:
+                return ERROR_PREFIX + "Link is invalid or is unsupported by this application."
+            except ExtractorError as e:
+                return ERROR_PREFIX + "YouTube is being really goofy."
             except Exception as e:
                 return f"{ERROR_PREFIX}{e}"
         return "Downloaded!"
