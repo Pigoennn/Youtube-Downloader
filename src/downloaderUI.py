@@ -22,7 +22,7 @@ class YouTubeDownloaderUI(QWidget):
         self.createLabels()
         self.createPushButtons()
 
-        self.resize(400,200)
+        self.setFixedSize(400, 200)
 
         self.fullLayout = QVBoxLayout()
         self.configurationArea = QHBoxLayout()
@@ -107,6 +107,7 @@ class YouTubeDownloaderUI(QWidget):
         """
         self.errorLabel.setText("")
         self.folderRedirectionButton.setVisible(False)
+        self.setFixedSize(400, 200)
 
     def download(self) -> None:
         """ Function called to attempt to download the file type from the given URL """
@@ -131,7 +132,7 @@ class YouTubeDownloaderUI(QWidget):
         # if successful, update UI
         if resultMessage[:len(ERROR_PREFIX)] != ERROR_PREFIX:
             self.folderRedirectionButton.setVisible(True)
-            self.resize(400, 230)
+            self.setFixedSize(400, 230)
     
     def openDownloads(self) -> None:
         """ Function called to open the downloads folder. """
