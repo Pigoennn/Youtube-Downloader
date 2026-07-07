@@ -16,7 +16,7 @@ class YouTubeDownloaderUI(QWidget):
         self.downloader = downloader
 
         self.setWindowTitle("YouTube Video Downloader")
-        self.setWindowIcon(QIcon(self.findImage("shocku.png")))
+        self.setWindowIcon(QIcon(self.findImage("shocku.ico")))
         self.createRadioButtons()
         self.createURLInput()
         self.createLabels()
@@ -56,7 +56,7 @@ class YouTubeDownloaderUI(QWidget):
 
         return path.join(basePath, relative_path)
 
-    def createURLInput(self):
+    def createURLInput(self) -> None:
         """ Create the input box for URLs """
         self.urlBox = QLineEdit()
         self.urlBox.setFixedWidth(150)
@@ -64,7 +64,7 @@ class YouTubeDownloaderUI(QWidget):
         self.urlBox.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.urlBox.textChanged.connect(self.update)
     
-    def createLabels(self):
+    def createLabels(self) -> None:
         """ Create the title and instruction labels """
         self.titleLabel = QLabel("<h2>Jono's Really Cool Video Downloader</h2>")
         self.fileTypeLabel = QLabel("<h3>Choose File Type:</h3>")
@@ -72,7 +72,7 @@ class YouTubeDownloaderUI(QWidget):
         self.errorLabel = QLabel("")
         self.errorLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
-    def createPushButtons(self):
+    def createPushButtons(self) -> None:
         """ Create the push buttons """
         self.downloadButton = QPushButton("Download")
         self.downloadButton.clicked.connect(self.download)
@@ -82,7 +82,7 @@ class YouTubeDownloaderUI(QWidget):
         self.folderRedirectionButton.setVisible(False)
         self.folderRedirectionButton.clicked.connect(self.openDownloads)
 
-    def createRadioButtons(self):
+    def createRadioButtons(self) -> None:
         """ Create the Radio Selection Buttons """
         self.mp3Button = QRadioButton("MP3", self)
         self.mp3Button.toggled.connect(self.optionSelected)
@@ -92,11 +92,11 @@ class YouTubeDownloaderUI(QWidget):
 
         self.fileTypeOption = ""
 
-    def optionSelected(self):
+    def optionSelected(self) -> None:
         """ Function called to get value of the radio selection options """
         self.fileTypeOption = self.sender().text()      # type: ignore
 
-    def update(self):
+    def update(self) -> None:
         """
         Called when a URL has been inputted.
         Resets the app to look clean.
@@ -104,7 +104,7 @@ class YouTubeDownloaderUI(QWidget):
         self.errorLabel.setText("")
         self.folderRedirectionButton.setVisible(False)
 
-    def download(self):
+    def download(self) -> None:
         """ Function called to attempt to download the file type from the given URL """
         self.errorLabel.setText("")
         
@@ -129,6 +129,6 @@ class YouTubeDownloaderUI(QWidget):
             self.folderRedirectionButton.setVisible(True)
             self.resize(400, 230)
     
-    def openDownloads(self):
+    def openDownloads(self) -> None:
         """ Function called to open the downloads folder. """
         startfile(DOWNLOAD_PATH)
