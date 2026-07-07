@@ -1,6 +1,9 @@
 from typing import Any
 import yt_dlp
 from yt_dlp.utils import DownloadError, ExtractorError, GeoRestrictedError
+import sys
+from os import path
+from pathlib import Path
 ERROR_PREFIX = "ERROR: "
 
 class Downloader:
@@ -11,14 +14,29 @@ class Downloader:
     baseConfig: dict[str, Any]
     ydlConfig: dict[str, Any]
 
-    def __init__(self, outputPath: str = ".", ffmpegPath: str = "C:\\ffmpeg\\bin") -> None:
-        self.outputPath = outputPath
+    def __init__(self, outputPath: str = ".") -> None:
+        # get output location
+        if not(outputPath) or outputPath == ".":
+            self.outputPath = str(Path.home() / "Downloads")
+        else:
+            self.outputPath = path.abspath(outputPath.strip("'\""))
+
         self.baseConfig = {
-            "outtmpl": f"{outputPath}/%(title)s.%(ext)s"
+            "outtmpl": path.join(self.outputPath, "%(title)s.%(ext)s")
         }
         self.ydlConfig: dict[str, Any] = {}
+        
+        self.baseConfig["ffmpeg_location"] = self.getFFMPEGLocation()
 
-        self.baseConfig["ffmpeg_location"] = ffmpegPath
+    def getFFMPEGLocation(self) -> str:
+        """ Get ffmpeg location using Path """
+        if getattr(sys, "frozen", False):
+            # when run from exe
+            tempDir = Path(getattr(sys, "_MEIPASS", path.abspath("."))).resolve()
+        else:
+            # when run from python source code
+            tempDir = Path(__file__).resolve().parent
+        return str(tempDir / "ffmpeg")
             
     def setConfig(self, downloadType: str) -> str:
         """

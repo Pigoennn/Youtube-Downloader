@@ -12,12 +12,10 @@ if __name__ == "__main__":
 
     # check if download path is listed
     outputPath = config["LOCATIONS"]["download_location"]
-    # check if ffmpeg.exe path is listed
-    ffmpegPath = config["LOCATIONS"]["ffmpeg_location"]
 
     imageName = config["NAMES"]["image_name"]
 
-    window = YouTubeDownloaderUI(Downloader(outputPath, ffmpegPath))
+    window = YouTubeDownloaderUI(Downloader(outputPath))
     window.setImage(imageName)
     window.show()
     exit(app.exec())
