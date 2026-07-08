@@ -160,15 +160,16 @@ class YouTubeDownloaderUI(QWidget):
         self.downloadButton.setEnabled(False)
         self._setSize("downloading")
 
-        # set up the Download worker to 
+        # set up the Download worker
         self.worker = DownloadWorker(self.downloader, url, self.fileTypeOption)
         self.worker.progressUpdated.connect(self.progressBar.setValue)
         self.worker.statusUpdated.connect(self.errorLabel.setText)
-        self.worker.finished.connect(self._onCompletedDownload)
+        self.worker.finished.connect(self.onCompletedDownload)
 
         self.worker.start()
 
-    def _onCompletedDownload(self, resultMessage: str) -> None:
+    def onCompletedDownload(self, resultMessage: str) -> None:
+        """ Function called when a download is completed. """
         self.errorLabel.setText(resultMessage)
         self.downloadButton.setEnabled(True)
 
