@@ -4,7 +4,7 @@
 
 <p>Use <strong>config.ini</strong> to specify:</p>
 <ul>
-    <li> the desired output folder (by default chooses your Downloads folder) </li>
+    <li> the desired output folder (by default chooses the folder the application is in) </li>
     <li> the location of the desired application icon (not required, by default uses the one included in the repo)</li>
 </ul>
 
