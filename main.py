@@ -1,10 +1,18 @@
 from src.downloader import Downloader
 from src.downloaderUI import YouTubeDownloaderUI
+from src.path_finder import PathFinder
 from PyQt6.QtWidgets import QApplication, QMessageBox
 import configparser
 import sys
-from os import path
+from typing import NoReturn
 
+def verifyPath(instance: str | configparser.Error | KeyError) -> str | NoReturn:
+    if isinstance(instance, (configparser.Error, KeyError)):
+        displayError(instance)
+        sys.exit(1)
+    else:
+        return str(instance)
+    
 def displayError(e: configparser.Error | KeyError):
     error_msg = QMessageBox()
     error_msg.setIcon(QMessageBox.Icon.Critical)
@@ -16,26 +24,14 @@ def displayError(e: configparser.Error | KeyError):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    pathFinder = PathFinder(getattr(sys, "_MEIPASS", False))
 
-    if getattr(sys, "frozen", False):
-        bundleDir = getattr(sys, "_MEIPASS", path.abspath("."))
-        ffmpegDir = path.join(bundleDir, "ffmpeg")
-    else:
-        currentDir = path.dirname(path.abspath(__file__))
-        ffmpegDir = path.join(currentDir, "src", "ffmpeg")
+    outputPath = verifyPath(pathFinder.getOutputFolder())
+    imagePath = verifyPath(pathFinder.getImagePath())
 
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-
-    try: 
-        outputPath = config["LOCATIONS"]["download_location"]
-        imageName = config["NAMES"]["image_name"]
-    except (configparser.Error, KeyError) as e:
-        # KeyError occurs if a section or an option is missing or misspelled
-        displayError(e)
-        sys.exit(1)
+    ffmpegDir = pathFinder.getFFMPEG()
 
     window = YouTubeDownloaderUI(Downloader(outputPath, ffmpegDir), outputPath)
-    window.setImage(imageName)
+    window.setImage(imagePath)
     window.show()
     sys.exit(app.exec())

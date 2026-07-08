@@ -2,9 +2,8 @@ from pathlib import Path
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from os import startfile, path
+from os import startfile
 from src.downloader import Downloader
-import sys
 
 DOWNLOAD_PATH = str(Path.home()/"Downloads")
 BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
@@ -48,25 +47,8 @@ class YouTubeDownloaderUI(QWidget):
 
         self.setLayout(self.fullLayout)
 
-    def _getAbsolutePath(self, relative_path: str) -> str:
-        """ Get absolute path to resource, works for dev and for PyInstaller """
-        try:
-            basePath = getattr(sys, '_MEIPASS')
-        except AttributeError:
-            basePath = path.abspath(".")
-
-        return path.join(basePath, relative_path)
-    
-    def setImage(self, imageName: str) -> None:
-        """ Set the image of the application. """
-        # figure out first which path to use
-        if getattr(sys, "frozen", False):
-            basePath = getattr(sys, "_MEIPASS", path.abspath("."))
-            imagePath = path.join(basePath, imageName)
-        else:
-            basePath = path.dirname(path.dirname(path.abspath(__file__)))
-            imagePath = path.join(basePath, imageName)
-            
+    def setImage(self, imagePath: str) -> None:
+        """ Set the image of the application to the image described by `imagePath`. """          
         self.setWindowIcon(QIcon(imagePath))
 
     def _createURLInput(self) -> None:
