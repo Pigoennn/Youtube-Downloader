@@ -2,6 +2,7 @@ from typing import Any
 import yt_dlp
 from yt_dlp.utils import DownloadError, ExtractorError, GeoRestrictedError
 from os import path
+from typing import Any
 
 ERROR_PREFIX = "ERROR: "
 
@@ -25,7 +26,7 @@ class Downloader:
             
     def setConfig(self, downloadType: str) -> str:
         """
-        Set the config from the given download type.
+        Set up the config according to the given download type.
         Returns an error code if an error occurs, otherwise returns an empty string.
         """
         currentConfig = self.baseConfig.copy()      # set as temporary for now
@@ -57,7 +58,7 @@ class Downloader:
         self.ydlConfig = currentConfig
         return ""
 
-    def download(self, url: str) -> str:
+    def download(self, url: str, progressHook: Any = None) -> str:
         """
         Download the file format from the given url.
         All config settings must be set first.
@@ -65,7 +66,12 @@ class Downloader:
         if not self._canDownload():
             return ERROR_PREFIX + "Configuration not set. Set the configurations first."
         
-        with yt_dlp.YoutubeDL(self.ydlConfig) as ydl:        # type: ignore
+        # hook
+        runtimeConfig = self.ydlConfig.copy()
+        if progressHook:
+            runtimeConfig["progress_hooks"] = [progressHook]
+
+        with yt_dlp.YoutubeDL(runtimeConfig) as ydl:        # type: ignore
             try:
                 ydl.download([url])
             except GeoRestrictedError as e:

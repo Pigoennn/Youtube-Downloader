@@ -1,9 +1,10 @@
 from pathlib import Path
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QWidget
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QRadioButton, QWidget, QProgressBar
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from os import startfile
 from src.downloader import Downloader
+from src.download_worker import DownloadWorker
 
 DOWNLOAD_PATH = str(Path.home()/"Downloads")
 BAD_LIST = ["\\", ":", "?", "#", "%", "&", "{", "}", "<", ">", "*", "/", "$", "!", "\'", "\"", ":", "@", "+", "`", "|", "="]
@@ -21,8 +22,9 @@ class YouTubeDownloaderUI(QWidget):
         self._createURLInput()
         self._createLabels()
         self._createPushButtons()
+        self._createProgressBar()
 
-        self.setFixedSize(400, 200)
+        self._setSize("default")
 
         self.fullLayout = QVBoxLayout()
         self.configurationArea = QHBoxLayout()
@@ -42,6 +44,7 @@ class YouTubeDownloaderUI(QWidget):
         self.urlLayout.addWidget(self.urlBox)
 
         self.fullLayout.addWidget(self.errorLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.fullLayout.addWidget(self.progressBar, alignment=Qt.AlignmentFlag.AlignCenter)
         self.fullLayout.addWidget(self.downloadButton, alignment=Qt.AlignmentFlag.AlignCenter)
         self.fullLayout.addWidget(self.folderRedirectionButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -51,13 +54,37 @@ class YouTubeDownloaderUI(QWidget):
         """ Set the image of the application to the image described by `imagePath`. """          
         self.setWindowIcon(QIcon(imagePath))
 
+    def _createProgressBar(self) -> None:
+        self.progressBar = QProgressBar()
+        self.progressBar.setValue(0)
+        self.progressBar.setVisible(False)
+        self.progressBar.setFixedSize(350, 16)
+        self.progressBar.setStyleSheet(
+            """
+            QProgressBar {
+                border: 1px solid #D1D5DB;
+                border-radius: 6px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 11px;
+                color: #1F2937;
+                background-color: #F3F4F6;
+            }
+
+            QProgressBar::chunk {
+                background-color: #4d90ff;
+                border-radius: 5px;
+            }
+            """
+        )
+
     def _createURLInput(self) -> None:
         """ Create the input box for URLs """
         self.urlBox = QLineEdit()
         self.urlBox.setFixedWidth(150)
         #self.urlBox.setFixedSize(150,60)
         self.urlBox.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.urlBox.textChanged.connect(self.update)
+        self.urlBox.textChanged.connect(self._update)
     
     def _createLabels(self) -> None:
         """ Create the title and instruction labels """
@@ -87,6 +114,15 @@ class YouTubeDownloaderUI(QWidget):
 
         self.fileTypeOption = ""        # set to empty to start
 
+    def _setSize(self, setting: str) -> None:
+        match setting:
+            case "default":
+                self.setFixedSize(400, 200)
+            case "downloading":
+                self.setFixedSize(400, 250)
+            case "finished":
+                self.setFixedSize(400, 280)
+
     def _optionSelected(self) -> None:
         """ Function called to get value of the radio selection options """
         self.fileTypeOption = self.sender().text()      # type: ignore
@@ -98,7 +134,9 @@ class YouTubeDownloaderUI(QWidget):
         """
         self.errorLabel.setText("")
         self.folderRedirectionButton.setVisible(False)
-        self.setFixedSize(400, 200)
+        self.progressBar.setVisible(False)
+        self.progressBar.setValue(0)
+        self._setSize("default")
 
     def _download(self) -> None:
         """ Function called to attempt to download the file type from the given URL """
@@ -115,16 +153,30 @@ class YouTubeDownloaderUI(QWidget):
             self.errorLabel.setText(resultMessage)
             return
 
-        # attempt to download
+        # set up UI components
         self.errorLabel.setText("Loading...")
-        resultMessage = self.downloader.download(url)
+        self.progressBar.setValue(0)
+        self.progressBar.setVisible(True)
+        self.downloadButton.setEnabled(False)
+        self._setSize("downloading")
+
+        # set up the Download worker to 
+        self.worker = DownloadWorker(self.downloader, url, self.fileTypeOption)
+        self.worker.progressUpdated.connect(self.progressBar.setValue)
+        self.worker.statusUpdated.connect(self.errorLabel.setText)
+        self.worker.finished.connect(self._onCompletedDownload)
+
+        self.worker.start()
+
+    def _onCompletedDownload(self, resultMessage: str) -> None:
         self.errorLabel.setText(resultMessage)
+        self.downloadButton.setEnabled(True)
 
         # if successful, update UI
         if resultMessage[:len(ERROR_PREFIX)] != ERROR_PREFIX:
             self.folderRedirectionButton.setVisible(True)
-            self.setFixedSize(400, 230)
-    
+            self._setSize("finished")
+
     def _openDownloads(self) -> None:
         """ Function called to open the downloads folder. """
         startfile(self.outputPath)
