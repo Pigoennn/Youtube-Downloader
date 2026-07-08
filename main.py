@@ -1,9 +1,9 @@
 from src.downloader import Downloader
 from src.downloaderUI import YouTubeDownloaderUI
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QMessageBox
 import configparser
 import sys
-from PyQt6.QtWidgets import QApplication, QMessageBox
+from os import path
 
 def displayError(e: configparser.Error | KeyError):
     error_msg = QMessageBox()
@@ -17,6 +17,13 @@ def displayError(e: configparser.Error | KeyError):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
+    if getattr(sys, "frozen", False):
+        bundleDir = getattr(sys, "_MEIPASS", path.abspath("."))
+        ffmpegDir = path.join(bundleDir, "ffmpeg")
+    else:
+        currentDir = path.dirname(path.abspath(__file__))
+        ffmpegDir = path.join(currentDir, "src", "ffmpeg")
+
     config = configparser.ConfigParser()
     config.read("config.ini")
 
@@ -28,7 +35,7 @@ if __name__ == "__main__":
         displayError(e)
         sys.exit(1)
 
-    window = YouTubeDownloaderUI(Downloader(outputPath), outputPath)
+    window = YouTubeDownloaderUI(Downloader(outputPath, ffmpegDir), outputPath)
     window.setImage(imageName)
     window.show()
     sys.exit(app.exec())
