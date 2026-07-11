@@ -21,7 +21,8 @@ class Downloader:
         self.ydlConfig: dict[str, Any] = {}
         self.baseConfig = {
             "outtmpl": path.join(self.outputPath, "%(title)s.%(ext)s"),
-            "ffmpeg_location": ffmpegDir
+            "ffmpeg_location": ffmpegDir,
+            "noplaylist": True
         }
             
     def setConfig(self, downloadType: str) -> str:
